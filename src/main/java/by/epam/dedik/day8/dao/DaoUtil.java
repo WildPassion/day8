@@ -1,5 +1,7 @@
 package by.epam.dedik.day8.dao;
 
+import by.epam.dedik.day8.dao.impl.SqlCustomBook;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,13 +12,9 @@ public class DaoUtil {
         try {
             if (statement != null) {
                 statement.close();
-            } else {
-                // TODO: 26.07.2020 log
             }
             if (connection != null) {
                 connection.close();
-            } else {
-                // TODO: 26.07.2020 log
             }
         } catch (SQLException e) {
             // TODO: 26.07.2020 log
@@ -27,8 +25,6 @@ public class DaoUtil {
         try {
             if (resultSet != null) {
                 resultSet.close();
-            } else {
-                // TODO: 26.07.2020 log
             }
             closeConnection(connection, statement);
         } catch (SQLException e) {

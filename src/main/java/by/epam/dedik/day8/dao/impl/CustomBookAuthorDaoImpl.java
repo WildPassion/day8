@@ -15,11 +15,6 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
-    private static final String INSERT_AUTHOR = "INSERT INTO author (name, surname, last_name) VALUES (?, ?, ?)";
-    private static final String DELETE_AUTHOR = "DELETE FROM author WHERE name = ? AND surname = ? AND  last_name = ?";
-    private static final String UPDATE_AUTHOR_BY_ID = "UPDATE author SET name = ?, surname = ?,  last_name = ? WHERE id = ?";
-    private static final String FIND_AUTHOR = "SELECT id, name, surname, last_name FROM author WHERE name = ? AND surname = ? AND last_name = ?";
-
     @Override
     public boolean addAuthor(CustomBookAuthor author) throws DaoException {
         boolean result = false;
@@ -28,7 +23,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(INSERT_AUTHOR);
+            preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.INSERT_AUTHOR);
 
             preparedStatement.setString(1, author.getName());
             preparedStatement.setString(2, author.getSurname());
@@ -55,7 +50,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(DELETE_AUTHOR);
+            preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.DELETE_AUTHOR);
 
             preparedStatement.setString(1, author.getName());
             preparedStatement.setString(2, author.getSurname());
@@ -86,7 +81,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
             PreparedStatement preparedStatement = null;
             try {
                 connection = DataSourceFactory.createMysqlDataSource().getConnection();
-                preparedStatement = connection.prepareStatement(UPDATE_AUTHOR_BY_ID);
+                preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.UPDATE_AUTHOR_BY_ID);
 
                 preparedStatement.setString(1, newAuthor.getName());
                 preparedStatement.setString(2, newAuthor.getSurname());
@@ -116,14 +111,13 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_AUTHOR);
+            preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.FIND_AUTHOR);
 
             preparedStatement.setString(1, author.getName());
             preparedStatement.setString(2, author.getSurname());
             preparedStatement.setString(3, author.getLastName());
             resultSet = preparedStatement.executeQuery();
 
-            System.out.println(CustomBookAuthorColumn.LAST_NAME.getColumn());
             if (resultSet.next()) {
                 CustomBookAuthor findAuthor =
                         new CustomBookAuthor(resultSet.getInt(CustomBookAuthorColumn.ID.getColumn()),

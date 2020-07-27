@@ -7,21 +7,21 @@ import java.util.StringJoiner;
 public class CustomBook {
     private int id;
     private String name;
-    private List<String> authors;
+    private List<CustomBookAuthor> authors;
     private int year;
     private int numberPages;
 
     public CustomBook() {
     }
 
-    public CustomBook(String name, List<String> authors, int year, int numberPages) {
+    public CustomBook(String name, List<CustomBookAuthor> authors, int year, int numberPages) {
         this.name = name;
         this.authors = authors;
         this.year = year;
         this.numberPages = numberPages;
     }
 
-    public CustomBook(int id, String name, List<String> authors, int year, int numberPages) {
+    public CustomBook(int id, String name, List<CustomBookAuthor> authors, int year, int numberPages) {
         this.id = id;
         this.name = name;
         this.authors = authors;
@@ -45,11 +45,11 @@ public class CustomBook {
         this.name = name;
     }
 
-    public List<String> getAuthors() {
+    public List<CustomBookAuthor> getAuthors() {
         return Collections.unmodifiableList(authors);
     }
 
-    public void setAuthors(List<String> authors) {
+    public void setAuthors(List<CustomBookAuthor> authors) {
         this.authors = authors;
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 public interface CustomBookDao {
     boolean addBook(CustomBook book) throws DaoException;
 
-    boolean removeBook(CustomBook book) throws DaoException;
+    boolean deleteBook(CustomBook book) throws DaoException;
 
     List<CustomBook> findByName(String name) throws DaoException;
 
