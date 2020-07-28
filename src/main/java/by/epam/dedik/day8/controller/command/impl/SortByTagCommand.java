@@ -8,14 +8,16 @@ import by.epam.dedik.day8.dao.CustomBookField;
 import by.epam.dedik.day8.dao.DaoException;
 import by.epam.dedik.day8.dao.impl.CustomBookDaoImpl;
 import by.epam.dedik.day8.entity.CustomBook;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class SortByTagCommand implements BookCommand {
-    public static final String SUCCESS = "Extracting sort list was successful";
-    public static final String FAIL = "Extracting sort list did not happen";
+    private static final String SUCCESS = "Extracting sort list was successful";
+    private static final String FAIL = "Extracting sort list did not happen";
+    private Logger logger = Logger.getLogger(SortByTagCommand.class);
 
     @Override
     public void execute(Map<String, Object> request, BookResponse response) {
@@ -36,7 +38,7 @@ public class SortByTagCommand implements BookCommand {
                     response.setBooks(books);
                 }
             } catch (DaoException e) {
-                // TODO: 28.07.2020 log
+                logger.error(e);
                 response.setError(true);
                 response.setMessage(e.getMessage());
             }

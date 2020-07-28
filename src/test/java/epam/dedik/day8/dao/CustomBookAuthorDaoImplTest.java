@@ -7,6 +7,7 @@ import by.epam.dedik.day8.dao.connection.ConnectionException;
 import by.epam.dedik.day8.dao.connection.DataSourceFactory;
 import by.epam.dedik.day8.dao.impl.CustomBookAuthorDaoImpl;
 import by.epam.dedik.day8.entity.CustomBookAuthor;
+import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -18,11 +19,8 @@ public class CustomBookAuthorDaoImplTest {
     private static final String DELETE_AUTHOR = "DELETE FROM author WHERE name = ? AND surname = ? AND  last_name = ?";
 
     private CustomBookAuthorDao dao = new CustomBookAuthorDaoImpl();
+    private Logger logger = Logger.getLogger(CustomBookAuthorDaoImplTest.class);
 
-    //    @BeforeClass
-//    public void setDao(CustomBookAuthorDao dao) {
-//        this.dao = new CustomBookAuthorDaoImpl();
-//    }
     private boolean clean(CustomBookAuthor author) throws ConnectionException {
         boolean result = true;
         Connection connection = null;
@@ -37,7 +35,7 @@ public class CustomBookAuthorDaoImplTest {
                 result = false;
             }
         } catch (SQLException e) {
-            // TODO: 26.07.2020 log
+            logger.debug(e);
         } finally {
             DaoUtil.closeConnection(connection, preparedStatement);
         }
@@ -49,7 +47,7 @@ public class CustomBookAuthorDaoImplTest {
         CustomBookAuthor author = new CustomBookAuthor("name", "surname", "lastName");
         boolean actual = dao.addAuthor(author);
         if (!clean(author)) {
-            // TODO: 26.07.2020 log
+            logger.debug("Data base clean did not happen");
         }
         Assert.assertTrue(actual);
     }
@@ -59,7 +57,7 @@ public class CustomBookAuthorDaoImplTest {
         boolean actual;
         CustomBookAuthor author = new CustomBookAuthor("name", "surname", "lastName");
         if (!dao.addAuthor(author)) {
-            // TODO: 26.07.2020 log
+            logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");
         }
         actual = dao.deleteAuthor(author);
         if (!actual) {
@@ -72,11 +70,11 @@ public class CustomBookAuthorDaoImplTest {
     public void findAuthor_author_author() throws ConnectionException, DaoException {
         CustomBookAuthor expected = new CustomBookAuthor("name", "surname", "lastName");
         if (!dao.addAuthor(expected)) {
-            // TODO: 26.07.2020 log
+            logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");
         }
         CustomBookAuthor actual = dao.findAuthor(expected).orElse(new CustomBookAuthor());
         if (!clean(actual)) {
-            // TODO: 27.07.2020 log
+            logger.debug("Data base clean did not happen");
         }
         Assert.assertEquals(actual, expected);
     }
@@ -86,11 +84,11 @@ public class CustomBookAuthorDaoImplTest {
         CustomBookAuthor source = new CustomBookAuthor("name", "surname", "lastName");
         CustomBookAuthor newAuthor = new CustomBookAuthor("name1", "surname", "lastName");
         if (!dao.addAuthor(source)) {
-            // TODO: 26.07.2020 log
+            logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");
         }
         boolean actual = dao.updateAuthor(source, newAuthor);
         if (!clean(newAuthor)) {
-            // TODO: 27.07.2020 log
+            logger.debug("Data base clean did not happen");
         }
         Assert.assertTrue(actual);
     }

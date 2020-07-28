@@ -7,6 +7,7 @@ import by.epam.dedik.day8.dao.impl.CustomBookDaoImpl;
 import by.epam.dedik.day8.entity.CustomBook;
 import by.epam.dedik.day8.entity.CustomBookAuthor;
 import epam.dedik.day8.data.DataTransfer;
+import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,22 +26,14 @@ public class CustomBookDaoTest {
             "WHERE name = ? AND year = ? AND  number_pages = ?";
 
     private CustomBookDao dao;
+    private Logger logger = Logger.getLogger(CustomBookAuthorDaoImplTest.class);
 
     @BeforeClass
     private void setBookListDao() {
         dao = new CustomBookDaoImpl();
     }
 
-//    @AfterMethod
-//    private void removeFromLibrary() {
-//        int i = Library.getInstance().getBooks().size();
-//        while (Library.getInstance().getBooks().size() > 0) {
-//            Library.getInstance().removeBook(--i);
-//        }
-//    }
-//
-
-    private boolean clean(CustomBook book) throws DaoException {
+    private boolean clean(CustomBook book) {
         boolean result = false;
         Connection connection = null;
         PreparedStatement statement = null;
@@ -59,8 +52,7 @@ public class CustomBookDaoTest {
                 statement.setInt(3, book.getNumberPages());
                 result = statement.executeUpdate() > 0;
             } catch (SQLException | ConnectionException e) {
-                e.printStackTrace();
-                // TODO: 27.07.2020 log
+                logger.debug(e);
             } finally {
                 DaoUtil.closeConnection(connection, statement);
             }
@@ -85,7 +77,7 @@ public class CustomBookDaoTest {
                 id = resultSet.getInt(CustomBookField.ID.getColumn());
             }
         } catch (SQLException | ConnectionException e) {
-            e.printStackTrace();
+            logger.debug(e);
         } finally {
             DaoUtil.closeConnection(connection, preparedStatement, resultSet);
         }
@@ -112,7 +104,7 @@ public class CustomBookDaoTest {
             try {
                 dao.addBook(book);
             } catch (DaoException e) {
-                e.printStackTrace();
+                logger.debug(e);
             }
         });
 
@@ -123,13 +115,7 @@ public class CustomBookDaoTest {
                 2004, 500)));
         List<Optional<CustomBook>> actual = dao.findByField(CustomBookField.NAME, String.valueOf(books.get(1).getName()));
 
-        books.forEach(book -> {
-            try {
-                clean(book);
-            } catch (DaoException e) {
-                e.printStackTrace();
-            }
-        });
+        books.forEach(this::clean);
 
         Assert.assertEquals(actual, expected);
     }
@@ -140,7 +126,7 @@ public class CustomBookDaoTest {
             try {
                 dao.addBook(book);
             } catch (DaoException e) {
-                e.printStackTrace();
+                logger.debug(e);
             }
         });
 
@@ -160,14 +146,7 @@ public class CustomBookDaoTest {
         );
         int limit = 3;
         List<Optional<CustomBook>> actual = dao.sortByField(CustomBookField.YEAR, limit);
-//        actual.forEach(System.out::print);
-        books.forEach(book -> {
-            try {
-                clean(book);
-            } catch (DaoException e) {
-                e.printStackTrace();
-            }
-        });
+        books.forEach(this::clean);
 
         Assert.assertEquals(actual, expected);
     }

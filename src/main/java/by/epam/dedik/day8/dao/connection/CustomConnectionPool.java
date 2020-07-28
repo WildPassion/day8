@@ -1,6 +1,7 @@
 package by.epam.dedik.day8.dao.connection;
 
 import com.mysql.cj.jdbc.Driver;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,6 +17,7 @@ public enum CustomConnectionPool {
     private static final int DEFAULT_POOL_SIZE = 32;
     private BlockingQueue<ProxyConnection> freeConnections;
     private Queue<ProxyConnection> usedConnections;
+    private Logger logger = Logger.getLogger(CustomConnectionPool.class);
 
     CustomConnectionPool() {
         try {
@@ -29,8 +31,7 @@ public enum CustomConnectionPool {
                 freeConnections.add(connection);
             }
         } catch (SQLException | ConnectionException e) {
-            e.printStackTrace();
-            // TODO: 26.07.2020 log
+            logger.error(e);
         }
     }
 
@@ -72,7 +73,7 @@ public enum CustomConnectionPool {
             try {
                 DriverManager.deregisterDriver(driver);
             } catch (SQLException e) {
-                // TODO: 24.07.2020 log
+                logger.error(e);
             }
         });
     }

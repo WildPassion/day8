@@ -1,5 +1,7 @@
 package by.epam.dedik.day8.dao.connection;
 
+import org.apache.log4j.Logger;
+
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
@@ -7,6 +9,7 @@ import java.util.concurrent.Executor;
 
 public class ProxyConnection implements Connection {
     private Connection connection;
+    private Logger logger = Logger.getLogger(ProxyConnection.class);
 
     public ProxyConnection(Connection connection) {
         this.connection = connection;
@@ -57,7 +60,7 @@ public class ProxyConnection implements Connection {
         try {
             CustomConnectionPool.INSTANCE.releaseConnection(this);
         } catch (ConnectionException e) {
-            // TODO: 26.07.2020 log
+            logger.error(e);
         }
     }
 

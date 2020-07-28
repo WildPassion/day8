@@ -7,6 +7,5 @@ public class CommandName {
     public static final String SORT_BY_TAG = "SORT_BY_TAG";
 
     private CommandName() {
-
     }
 }
