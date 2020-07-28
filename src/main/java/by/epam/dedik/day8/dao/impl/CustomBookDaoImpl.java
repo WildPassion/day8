@@ -237,7 +237,6 @@ public class CustomBookDaoImpl implements CustomBookDao {
                 result.add(map.get(ids.get(i)));
             }
             return result;
-//            return new ArrayList<>(map.values());
         } catch (SQLException e) {
             throw new DaoException("Can not extract books from database", e);
         } catch (ConnectionException e) {
