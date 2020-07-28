@@ -6,10 +6,12 @@ import java.time.LocalDate;
 
 public class BookValidator {
     private static final int FIRST_BOOK = -600;
+    private static final int MAX_NAME_LENGTH = 100;
 
     // TODO: 27.07.2020 rewrite for author
     public boolean isValidBook(CustomBook book) {
-        return book.getName() != null && book.getAuthors() != null &&
+        return book != null &&
+                book.getName() != null && book.getName().length() < MAX_NAME_LENGTH &&
                 book.getYear() > FIRST_BOOK && book.getYear() < LocalDate.now().getYear() &&
                 book.getNumberPages() != 0;
     }

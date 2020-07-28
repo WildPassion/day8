@@ -12,6 +12,10 @@ public class SqlCustomBook {
             "author.surname, author.last_name FROM (SELECT * FROM custom_book ORDER BY ";
     static final String SELECT_BOOK_ORDERED_PT2 = " LIMIT ?) AS b INNER JOIN custom_book_author AS ba " +
             "ON b.id = ba.id_custom_book INNER JOIN author ON ba.id_author = author.id";
+    static final String COLUMN_BOOK_ID = "b.id";
+    static final String COLUMN_BOOK_NAME = "b.name";
+    static final String COLUMN_BOOK_YEAR = "b.year";
+    static final String COLUMN_BOOK_NUMBER_PAGES = "b.number_pages";
 
     static final String INSERT_BOOK = "INSERT INTO custom_book (name, year, number_pages) VALUES (?, ?, ?)";
     static final String INSERT_LINK_AUTHOR_BOOK = "INSERT INTO custom_book_author " +
