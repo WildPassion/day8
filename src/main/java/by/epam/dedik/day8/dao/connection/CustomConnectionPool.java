@@ -24,7 +24,6 @@ public enum CustomConnectionPool {
             DriverManager.registerDriver(new Driver());
             freeConnections = new LinkedBlockingDeque<>(DEFAULT_POOL_SIZE);
             usedConnections = new ArrayDeque<>();
-            //todo without datasource
             for (int i = 0; i < DEFAULT_POOL_SIZE; i++) {
                 ProxyConnection connection =
                         new ProxyConnection(DataSourceFactory.createMysqlDataSource().getConnection());

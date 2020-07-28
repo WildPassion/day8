@@ -10,6 +10,9 @@ import java.util.Properties;
 public class DataSourceFactory {
     private static final String FILENAME = "db_prop.properties";
 
+    private DataSourceFactory() {
+    }
+
     public static MysqlDataSource createMysqlDataSource() throws ConnectionException {
         MysqlDataSource dataSource;
         Properties properties = new Properties();
