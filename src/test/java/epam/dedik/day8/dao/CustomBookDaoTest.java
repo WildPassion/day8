@@ -1,9 +1,6 @@
 package epam.dedik.day8.dao;
 
-import by.epam.dedik.day8.dao.CustomBookDao;
-import by.epam.dedik.day8.dao.CustomBookField;
-import by.epam.dedik.day8.dao.DaoException;
-import by.epam.dedik.day8.dao.DaoUtil;
+import by.epam.dedik.day8.dao.*;
 import by.epam.dedik.day8.dao.connection.ConnectionException;
 import by.epam.dedik.day8.dao.connection.DataSourceFactory;
 import by.epam.dedik.day8.dao.impl.CustomBookDaoImpl;
@@ -18,10 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class CustomBookDaoTest {
     static final String DELETE_LINK_AUTHOR_BOOK = "DELETE FROM custom_book_author WHERE id_custom_book = ?";
@@ -142,6 +136,39 @@ public class CustomBookDaoTest {
 
     @Test(dataProvider = "getBooks", dataProviderClass = DataTransfer.class)
     public void sortByField_fieldAndLimit_sortBooks(List<CustomBook> books) throws DaoException {
+        books.forEach(book -> {
+            try {
+                dao.addBook(book);
+            } catch (DaoException e) {
+                e.printStackTrace();
+            }
+        });
 
+        List<Optional<CustomBook>> expected = Arrays.asList(
+                Optional.of(new CustomBook("Book3", Arrays.asList(
+                        new CustomBookAuthor("Author41", "Surname", "LastName"),
+                        new CustomBookAuthor("Author42", "Surname", "LastName")),
+                        2001, 200)),
+                Optional.of(new CustomBook("Book5", Arrays.asList(
+                        new CustomBookAuthor("Author11", "Surname", "LastName"),
+                        new CustomBookAuthor("Author12", "Surname", "LastName")),
+                        2002, 300)),
+                Optional.of(new CustomBook("Book1", Arrays.asList(
+                        new CustomBookAuthor("Author21", "Surname", "LastName"),
+                        new CustomBookAuthor("Author22", "Surname", "LastName")),
+                        2003, 400))
+        );
+        int limit = 3;
+        List<Optional<CustomBook>> actual = dao.sortByField(CustomBookField.YEAR, limit);
+//        actual.forEach(System.out::print);
+        books.forEach(book -> {
+            try {
+                clean(book);
+            } catch (DaoException e) {
+                e.printStackTrace();
+            }
+        });
+
+        Assert.assertEquals(actual, expected);
     }
 }

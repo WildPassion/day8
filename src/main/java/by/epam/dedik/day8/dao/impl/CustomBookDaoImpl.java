@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomBookDaoImpl implements CustomBookDao {
     private BookValidator bookValidator = new BookValidator();
@@ -54,7 +55,6 @@ public class CustomBookDaoImpl implements CustomBookDao {
 
             List<CustomBookAuthor> authors = new ArrayList<>();
             do {
-                System.out.println(resultSet.getInt(CustomBookField.ID.getColumn()));
                 if (bookId == resultSet.getInt(CustomBookField.ID.getColumn())) {
                     CustomBookAuthor author = new CustomBookAuthor();
                     author.setName(resultSet.getString(CustomBookAuthorField.NAME.getColumn()));
@@ -162,7 +162,7 @@ public class CustomBookDaoImpl implements CustomBookDao {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        List<Optional<CustomBook>> books = new ArrayList<>();
+        List<Optional<CustomBook>> books;
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
             statement = connection.prepareStatement(SqlCustomBook.SELECT_BOOKS_BY_FIELD_PART1 + field.getColumn() +
@@ -170,7 +170,7 @@ public class CustomBookDaoImpl implements CustomBookDao {
             statement.setString(1, value);
             resultSet = statement.executeQuery();
 
-            extractBookList(resultSet);
+            books = extractBookList(resultSet);
         } catch (SQLException e) {
             throw new DaoException("Can not find book by name", e);
         } catch (ConnectionException e) {
@@ -183,19 +183,61 @@ public class CustomBookDaoImpl implements CustomBookDao {
 
     @Override
     public List<Optional<CustomBook>> sortByField(CustomBookField field, int limit) throws DaoException {
+        // TODO: 28.07.2020 validation
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        List<Optional<CustomBook>> books = new ArrayList<>();
+        List<Optional<CustomBook>> books;
+        StringBuilder stringBuilder = new StringBuilder("SELECT b.id, b.name, b.year, b.number_pages, ")
+                .append("author.name, author.surname, author.last_name FROM (SELECT * FROM custom_book ORDER BY year LIMIT 0, ?) AS b ")
+                .append("INNER JOIN custom_book_author AS ba ON b.id = ba.id_custom_book ")
+                .append("INNER JOIN author ON ba.id_author = author.id");
+        String sql = "SELECT b.id, b.name, b.year, b.number_pages, " +
+                "author.name, author.surname, author.last_name FROM (SELECT * FROM custom_book ORDER BY custom_book.year LIMIT 0, ?) AS b " +
+                "INNER JOIN custom_book_author AS ba ON b.id = ba.id_custom_book " +
+                "INNER JOIN author ON ba.id_author = author.id";
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            statement = connection.prepareStatement(SqlCustomBook.SELECT_BOOKS_ORDER_BY_FIELD +
-                    field.getColumn() + SqlCustomBook.LIMIT);
+            statement = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+//            statement.setString(1, field.getColumn());
             statement.setInt(1, limit);
             resultSet = statement.executeQuery();
 
-            extractBookList(resultSet);
+            Map<Integer, Optional<CustomBook>> map = new HashMap<>();
+            List<Integer> ids = new ArrayList<>();
+            while (resultSet.next()) {
+                if(!resultSet.isFirst()) {
+                    resultSet.previous();
+                }
+                CustomBook book = new CustomBook();
+                int bookId = resultSet.getInt("b.id");
+                book.setName(resultSet.getString("b.name"));
+                book.setYear(resultSet.getInt("b.year"));
+                book.setNumberPages(resultSet.getInt("b.number_pages"));
+
+                List<CustomBookAuthor> authors = new ArrayList<>();
+                do {
+                    if (bookId == resultSet.getInt("b.id")) {
+                        CustomBookAuthor author = new CustomBookAuthor();
+                        author.setName(resultSet.getString(CustomBookAuthorField.NAME.getColumn()));
+                        author.setSurname(resultSet.getString(CustomBookAuthorField.SURNAME.getColumn()));
+                        author.setLastName(resultSet.getString(CustomBookAuthorField.LAST_NAME.getColumn()));
+                        authors.add(author);
+                    } else {
+                        break;
+                    }
+                } while (resultSet.next());
+                book.setAuthors(authors);
+                map.put(bookId, Optional.of(book));
+                ids.add(bookId);
+            }
+            List<Optional<CustomBook>> result = new ArrayList<>();
+            for (int i = 0; i < map.size(); i++) {
+                result.add(map.get(ids.get(i)));
+            }
+            return result;
+//            return new ArrayList<>(map.values());
         } catch (SQLException e) {
             throw new DaoException("Can not extract books from database", e);
         } catch (ConnectionException e) {
@@ -203,6 +245,6 @@ public class CustomBookDaoImpl implements CustomBookDao {
         } finally {
             DaoUtil.closeConnection(connection, statement, resultSet);
         }
-        return books;
+
     }
 }
