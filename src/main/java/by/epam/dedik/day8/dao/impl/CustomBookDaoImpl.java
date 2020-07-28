@@ -12,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CustomBookDaoImpl implements CustomBookDao {
     private BookValidator bookValidator = new BookValidator();
@@ -165,8 +164,8 @@ public class CustomBookDaoImpl implements CustomBookDao {
         List<Optional<CustomBook>> books;
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            statement = connection.prepareStatement(SqlCustomBook.SELECT_BOOKS_BY_FIELD_PART1 + field.getColumn() +
-                    SqlCustomBook.SELECT_BOOK_BY_FIELD_PART2);
+            statement = connection.prepareStatement(SqlCustomBook.SELECT_BOOKS_BY_FIELD_PT1 + field.getColumn() +
+                    SqlCustomBook.SELECT_BOOK_BY_FIELD_PT2);
             statement.setString(1, value);
             resultSet = statement.executeQuery();
 
@@ -188,19 +187,13 @@ public class CustomBookDaoImpl implements CustomBookDao {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         List<Optional<CustomBook>> books;
-        StringBuilder stringBuilder = new StringBuilder("SELECT b.id, b.name, b.year, b.number_pages, ")
-                .append("author.name, author.surname, author.last_name FROM (SELECT * FROM custom_book ORDER BY year LIMIT 0, ?) AS b ")
-                .append("INNER JOIN custom_book_author AS ba ON b.id = ba.id_custom_book ")
-                .append("INNER JOIN author ON ba.id_author = author.id");
-        String sql = "SELECT b.id, b.name, b.year, b.number_pages, " +
-                "author.name, author.surname, author.last_name FROM (SELECT * FROM custom_book ORDER BY custom_book.year LIMIT 0, ?) AS b " +
-                "INNER JOIN custom_book_author AS ba ON b.id = ba.id_custom_book " +
-                "INNER JOIN author ON ba.id_author = author.id";
+        StringBuilder sql = new StringBuilder(SqlCustomBook.SELECT_BOOK_ORDERED_PT1)
+                .append(field.getColumn()).append(SqlCustomBook.SELECT_BOOK_ORDERED_PT2);
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            statement = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-//            statement.setString(1, field.getColumn());
+            statement = connection.prepareStatement(sql.toString(),
+                    ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statement.setInt(1, limit);
             resultSet = statement.executeQuery();
 
