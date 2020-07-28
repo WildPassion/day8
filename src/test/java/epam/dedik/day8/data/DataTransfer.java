@@ -59,4 +59,11 @@ public class DataTransfer {
                 new CustomBookAuthor("Name", "Surname", "Lastname")
         }};
     }
+
+    @DataProvider
+    public Object[][] getInvalidAuthor(){
+        return new Object[][]{{
+                new CustomBookAuthor("name", "Surname", "LastName")
+        }};
+    }
 }
