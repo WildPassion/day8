@@ -7,6 +7,7 @@ import by.epam.dedik.day8.dao.connection.ConnectionException;
 import by.epam.dedik.day8.dao.connection.DataSourceFactory;
 import by.epam.dedik.day8.dao.impl.CustomBookAuthorDaoImpl;
 import by.epam.dedik.day8.entity.CustomBookAuthor;
+import epam.dedik.day8.data.DataTransfer;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,9 +43,8 @@ public class CustomBookAuthorDaoImplTest {
         return result;
     }
 
-    @Test
-    public void addAuthor_author_true() throws DaoException, ConnectionException {
-        CustomBookAuthor author = new CustomBookAuthor("name", "surname", "lastName");
+    @Test(dataProvider = "getValidAuthor", dataProviderClass = DataTransfer.class)
+    public void addAuthor_author_true(CustomBookAuthor author) throws DaoException, ConnectionException {
         boolean actual = dao.addAuthor(author);
         if (!clean(author)) {
             logger.debug("Data base clean did not happen");
@@ -52,10 +52,9 @@ public class CustomBookAuthorDaoImplTest {
         Assert.assertTrue(actual);
     }
 
-    @Test
-    public void deleteAuthor_author_true() throws DaoException, ConnectionException {
+    @Test(dataProvider = "getValidAuthor", dataProviderClass = DataTransfer.class)
+    public void deleteAuthor_author_true(CustomBookAuthor author) throws DaoException, ConnectionException {
         boolean actual;
-        CustomBookAuthor author = new CustomBookAuthor("name", "surname", "lastName");
         if (!dao.addAuthor(author)) {
             logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");
         }
@@ -66,9 +65,8 @@ public class CustomBookAuthorDaoImplTest {
         Assert.assertTrue(actual);
     }
 
-    @Test
-    public void findAuthor_author_author() throws ConnectionException, DaoException {
-        CustomBookAuthor expected = new CustomBookAuthor("name", "surname", "lastName");
+    @Test(dataProvider = "getValidAuthor", dataProviderClass = DataTransfer.class)
+    public void findAuthor_author_author(CustomBookAuthor expected) throws ConnectionException, DaoException {
         if (!dao.addAuthor(expected)) {
             logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");
         }
@@ -79,9 +77,8 @@ public class CustomBookAuthorDaoImplTest {
         Assert.assertEquals(actual, expected);
     }
 
-    @Test
-    public void updateAuthor_author_true() throws ConnectionException, DaoException {
-        CustomBookAuthor source = new CustomBookAuthor("name", "surname", "lastName");
+    @Test(dataProvider = "getValidAuthor", dataProviderClass = DataTransfer.class)
+    public void updateAuthor_author_true(CustomBookAuthor source) throws ConnectionException, DaoException {
         CustomBookAuthor newAuthor = new CustomBookAuthor("name1", "surname", "lastName");
         if (!dao.addAuthor(source)) {
             logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");

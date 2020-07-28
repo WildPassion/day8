@@ -39,7 +39,7 @@ public class DataTransfer {
                 new CustomBook("Book1", Arrays.asList(
                         new CustomBookAuthor("Author1", "Surname", "LastName"),
                         new CustomBookAuthor("Author2", "Surname", "LastName")),
-                        1999, 700),
+                        1999, 700)
         }};
     }
 
@@ -49,9 +49,14 @@ public class DataTransfer {
                 new CustomBook("", Arrays.asList(
                         new CustomBookAuthor("Author1", "Surname", "LastName"),
                         new CustomBookAuthor("Author2", "Surname", "LastName")),
-                        -1999, 700),
+                        -1999, 700)
         }};
     }
 
-    // TODO: 26.07.2020 getAuthor
+    @DataProvider
+    public Object[][] getValidAuthor(){
+        return new Object[][]{{
+                new CustomBookAuthor("name", "surname", "lastName")
+        }};
+    }
 }
