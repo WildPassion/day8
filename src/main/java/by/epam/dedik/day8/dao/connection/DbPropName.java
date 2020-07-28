@@ -9,4 +9,7 @@ public class DbPropName {
     public static final String AUTO_RECONNECT = "db.autoReconnect";
     public static final String CHARACTER_ENCODING = "db.characterEncoding";
     public static final String USE_SSL="db.useSSL";
+
+    private DbPropName() {
+    }
 }

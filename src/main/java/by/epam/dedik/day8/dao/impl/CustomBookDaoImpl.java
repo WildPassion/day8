@@ -5,7 +5,6 @@ import by.epam.dedik.day8.dao.connection.ConnectionException;
 import by.epam.dedik.day8.dao.connection.DataSourceFactory;
 import by.epam.dedik.day8.entity.CustomBook;
 import by.epam.dedik.day8.entity.CustomBookAuthor;
-import by.epam.dedik.day8.validator.BookValidator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +13,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class CustomBookDaoImpl implements CustomBookDao {
-    private BookValidator bookValidator = new BookValidator();
     private CustomBookAuthorDao authorDao = new CustomBookAuthorDaoImpl();
 
     private int findBookId(CustomBook book) throws DaoException {
@@ -77,44 +75,40 @@ public class CustomBookDaoImpl implements CustomBookDao {
         PreparedStatement statement = null;
         if (findBookId(book) == -1) {
             try {
-                if (bookValidator.isValid(book)) {
-                    connection = DataSourceFactory.createMysqlDataSource().getConnection();
+                connection = DataSourceFactory.createMysqlDataSource().getConnection();
 
+                for (CustomBookAuthor author : book.getAuthors()) {
+                    if (authorDao.findAuthor(author).isEmpty()) {
+                        authorDao.addAuthor(author);
+                    }
+                }
+
+                statement = connection.prepareStatement(SqlCustomBook.INSERT_BOOK);
+                statement.setString(1, book.getName());
+                statement.setInt(2, book.getYear());
+                statement.setInt(3, book.getNumberPages());
+                statement.executeUpdate();
+                statement.close();
+
+                int bookId = findBookId(book);
+
+                if (bookId > 0) {
+                    book.setId(bookId);
+                    List<Integer> authorIds = new ArrayList<>();
                     for (CustomBookAuthor author : book.getAuthors()) {
-                        if (authorDao.findAuthor(author).isEmpty()) {
-                            authorDao.addAuthor(author);
+                        authorIds.add(authorDao.findAuthor(author)
+                                .orElse(new CustomBookAuthor(-1, "", "", "")).getId());
+
+                    }
+                    statement = connection.prepareStatement(SqlCustomBook.INSERT_LINK_AUTHOR_BOOK);
+                    for (int id : authorIds) {
+                        result = false;
+                        statement.setInt(1, bookId);
+                        statement.setInt(2, id);
+                        if (statement.executeUpdate() > 0) {
+                            result = true;
                         }
                     }
-
-                    statement = connection.prepareStatement(SqlCustomBook.INSERT_BOOK);
-                    statement.setString(1, book.getName());
-                    statement.setInt(2, book.getYear());
-                    statement.setInt(3, book.getNumberPages());
-                    statement.executeUpdate();
-                    statement.close();
-
-                    int bookId = findBookId(book);
-
-                    if (bookId > 0) {
-                        book.setId(bookId);
-                        List<Integer> authorIds = new ArrayList<>();
-                        for (CustomBookAuthor author : book.getAuthors()) {
-                            authorIds.add(authorDao.findAuthor(author)
-                                    .orElse(new CustomBookAuthor(-1, "", "", "")).getId());
-
-                        }
-                        statement = connection.prepareStatement(SqlCustomBook.INSERT_LINK_AUTHOR_BOOK);
-                        for (int id : authorIds) {
-                            result = false;
-                            statement.setInt(1, bookId);
-                            statement.setInt(2, id);
-                            if (statement.executeUpdate() > 0) {
-                                result = true;
-                            }
-                        }
-                    }
-                } else {
-                    throw new DaoException("Invalid book");
                 }
             } catch (SQLException e) {
                 throw new DaoException("Can not add book", e);
@@ -135,21 +129,17 @@ public class CustomBookDaoImpl implements CustomBookDao {
         book.setId(findBookId(book));
         if (book.getId() != -1) {
             try {
-                if (bookValidator.isValid(book)) {
-                    connection = DataSourceFactory.createMysqlDataSource().getConnection();
-                    statement = connection.prepareStatement(SqlCustomBook.DELETE_LINK_AUTHOR_BOOK);
-                    statement.setInt(1, book.getId());
-                    statement.executeUpdate();
-                    statement.close();
+                connection = DataSourceFactory.createMysqlDataSource().getConnection();
+                statement = connection.prepareStatement(SqlCustomBook.DELETE_LINK_AUTHOR_BOOK);
+                statement.setInt(1, book.getId());
+                statement.executeUpdate();
+                statement.close();
 
-                    statement = connection.prepareStatement(SqlCustomBook.DELETE_BOOK);
-                    statement.setString(1, book.getName());
-                    statement.setInt(2, book.getYear());
-                    statement.setInt(3, book.getNumberPages());
-                    result = statement.executeUpdate() > 0;
-                } else {
-                    throw new DaoException("Invalid book");
-                }
+                statement = connection.prepareStatement(SqlCustomBook.DELETE_BOOK);
+                statement.setString(1, book.getName());
+                statement.setInt(2, book.getYear());
+                statement.setInt(3, book.getNumberPages());
+                result = statement.executeUpdate() > 0;
             } catch (SQLException e) {
                 throw new DaoException("Can not delete book", e);
             } catch (ConnectionException e) {
