@@ -10,11 +10,8 @@ public class CommandHelper {
 
     public CommandHelper() {
         map.put(CommandName.ADD_BOOK, new AddBookCommand());
-        map.put(CommandName.REMOVE_BOOK, new RemoveBookCommand());
-        map.put(CommandName.FIND_BY_NAME, new FindByNameCommand());
-        map.put(CommandName.FIND_BY_AUTHOR, new FindByAuthorCommand());
-        map.put(CommandName.FIND_BY_YEAR, new FindByYearCommand());
-        map.put(CommandName.FIND_BY_NUMBER_PAGES, new FindByNumberPagesCommand());
+        map.put(CommandName.DELETE_BOOK, new DeleteBookCommand());
+        map.put(CommandName.FIND_BY_FIELD, new FindByFieldCommand());
         map.put(CommandName.SORT_BY_TAG, new SortByTagCommand());
     }
 

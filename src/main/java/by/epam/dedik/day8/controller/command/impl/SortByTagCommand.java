@@ -1,28 +1,45 @@
 package by.epam.dedik.day8.controller.command.impl;
 
-import by.epam.dedik.day8.controller.BookRequest;
 import by.epam.dedik.day8.controller.BookResponse;
 import by.epam.dedik.day8.controller.Params;
 import by.epam.dedik.day8.controller.command.BookCommand;
 import by.epam.dedik.day8.dao.CustomBookDao;
+import by.epam.dedik.day8.dao.CustomBookField;
 import by.epam.dedik.day8.dao.DaoException;
 import by.epam.dedik.day8.dao.impl.CustomBookDaoImpl;
 import by.epam.dedik.day8.entity.CustomBook;
-import by.epam.dedik.day8.service.SortType;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class SortByTagCommand implements BookCommand {
+    public static final String SUCCESS = "Extracting sort list was successful";
+    public static final String FAIL = "Extracting sort list did not happen";
+
     @Override
-    public void execute(BookRequest request, BookResponse response) {
+    public void execute(Map<String, Object> request, BookResponse response) {
         CustomBookDao dao = new CustomBookDaoImpl();
-        SortType sortType = SortType.valueOf(request.getParameter(Params.SORT_TYPE));
-        List<CustomBook> books = null;
-        try {
-            books = dao.sortByTag(sortType);
-        } catch (DaoException e) {
-            // TODO: 26.07.2020 exception in response
+        Object first = request.get(Params.FIELD);
+        Object second = request.get(Params.FIELD_VALUE);
+        if (first != null && first.getClass() == CustomBookField.class &&
+                second != null && second.getClass() == Integer.class) {
+            CustomBookField field = (CustomBookField) first;
+            int value = Integer.parseInt(String.valueOf(second));
+            try {
+                List<Optional<CustomBook>> books = dao.sortByField(field, value);
+                if (books.size() > value) {
+                    response.setError(true);
+                    response.setMessage(FAIL);
+                } else {
+                    response.setMessage(SUCCESS);
+                    response.setBooks(books);
+                }
+            } catch (DaoException e) {
+                // TODO: 28.07.2020 log
+                response.setError(true);
+                response.setMessage(e.getMessage());
+            }
         }
-        response.setBooks(books);
     }
 }

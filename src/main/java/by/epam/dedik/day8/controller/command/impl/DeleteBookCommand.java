@@ -10,9 +10,8 @@ import by.epam.dedik.day8.entity.CustomBook;
 
 import java.util.Map;
 
-public class AddBookCommand implements BookCommand {
-    public static final String SUCCESS = "Adding was successful";
-    private static final String FAIL = "Adding did not happen";
+public class DeleteBookCommand implements BookCommand {
+    public static final String SUCCESS = "Removing was successful";
 
     @Override
     public void execute(Map<String, Object> request, BookResponse response) {
@@ -21,13 +20,9 @@ public class AddBookCommand implements BookCommand {
         if (o != null && o.getClass() == CustomBook.class) {
             CustomBook book = (CustomBook) o;
             try {
-                if (!dao.addBook(book)) {
-                    response.setError(true);
-                    response.setMessage(FAIL);
-                } else {
-                    response.setError(false);
-                    response.setMessage(SUCCESS);
-                }
+                dao.deleteBook(book);
+                response.setError(false);
+                response.setMessage(SUCCESS);
             } catch (DaoException e) {
                 // TODO: 28.07.2020 log
                 response.setError(true);

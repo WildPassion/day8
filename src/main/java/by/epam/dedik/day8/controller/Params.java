@@ -1,11 +1,11 @@
 package by.epam.dedik.day8.controller;
 
-public enum Params {
-    BOOK,
-    NAME,
-    AUTHOR,
-    YEAR,
-    NUMBER_PAGES,
-    SORT_TYPE,
-    COMMAND
+public class Params {
+    public static final String BOOK = "book";
+    public static final String FIELD = "field";
+    public static final String FIELD_VALUE = "value";
+    public static final String COMMAND = "command";
+
+    private Params() {
+    }
 }
