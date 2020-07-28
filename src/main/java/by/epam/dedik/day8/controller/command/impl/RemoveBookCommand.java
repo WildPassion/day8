@@ -18,7 +18,7 @@ public class RemoveBookCommand implements BookCommand {
         CustomBookDao dao = new CustomBookDaoImpl();
         CustomBook book = BookConverterService.toBook(request.getParameter(Params.BOOK));
         try {
-            dao.removeBook(book);
+            dao.deleteBook(book);
             response.setMessage(SUCCESS);
         } catch (DaoException e) {
             response.setMessage(e.getMessage());

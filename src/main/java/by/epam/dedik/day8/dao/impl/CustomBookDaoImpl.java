@@ -5,24 +5,76 @@ import by.epam.dedik.day8.dao.connection.ConnectionException;
 import by.epam.dedik.day8.dao.connection.DataSourceFactory;
 import by.epam.dedik.day8.entity.CustomBook;
 import by.epam.dedik.day8.entity.CustomBookAuthor;
-import by.epam.dedik.day8.service.SortType;
 import by.epam.dedik.day8.validator.BookValidator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CustomBookDaoImpl implements CustomBookDao {
     private BookValidator bookValidator = new BookValidator();
     private CustomBookAuthorDao authorDao = new CustomBookAuthorDaoImpl();
 
+    private int findBookId(CustomBook book) throws DaoException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        int id = -1;
+
+        try {
+            connection = DataSourceFactory.createMysqlDataSource().getConnection();
+            statement = connection.prepareStatement(SqlCustomBook.SELECT_ID_BOOK);
+            statement.setString(1, book.getName());
+            statement.setInt(2, book.getYear());
+            statement.setInt(3, book.getNumberPages());
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                id = resultSet.getInt(CustomBookField.ID.getColumn());
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Can not find book", e);
+        } catch (ConnectionException e) {
+            throw new DaoException("Can not create data source", e);
+        } finally {
+            DaoUtil.closeConnection(connection, statement, resultSet);
+        }
+        return id;
+    }
+
+    private List<Optional<CustomBook>> extractBookList(ResultSet resultSet) throws SQLException {
+        Map<Integer, Optional<CustomBook>> map = new HashMap<>();
+        while (resultSet.next()) {
+            CustomBook book = new CustomBook();
+            int bookId = resultSet.getInt(CustomBookField.ID.getColumn());
+            book.setName(resultSet.getString(CustomBookField.NAME.getColumn()));
+            book.setYear(resultSet.getInt(CustomBookField.YEAR.getColumn()));
+            book.setNumberPages(resultSet.getInt(CustomBookField.NUMBER_PAGES.getColumn()));
+
+            List<CustomBookAuthor> authors = new ArrayList<>();
+            do {
+                System.out.println(resultSet.getInt(CustomBookField.ID.getColumn()));
+                if (bookId == resultSet.getInt(CustomBookField.ID.getColumn())) {
+                    CustomBookAuthor author = new CustomBookAuthor();
+                    author.setName(resultSet.getString(CustomBookAuthorField.NAME.getColumn()));
+                    author.setSurname(resultSet.getString(CustomBookAuthorField.SURNAME.getColumn()));
+                    author.setLastName(resultSet.getString(CustomBookAuthorField.LAST_NAME.getColumn()));
+                    authors.add(author);
+                } else {
+                    break;
+                }
+            } while (resultSet.next());
+            book.setAuthors(authors);
+            map.put(book.getId(), Optional.of(book));
+        }
+        return new ArrayList<>(map.values());
+    }
+
     @Override
     public boolean addBook(CustomBook book) throws DaoException {
+        // TODO: 28.07.2020 validation
         boolean result = false;
-//        if (bookValidator.isValidBook(book)) {
         Connection connection = null;
         PreparedStatement statement = null;
         if (findBookId(book) == -1) {
@@ -75,6 +127,7 @@ public class CustomBookDaoImpl implements CustomBookDao {
 
     @Override
     public boolean deleteBook(CustomBook book) throws DaoException {
+        // TODO: 28.07.2020 validation
         boolean result = false;
         Connection connection = null;
         PreparedStatement statement = null;
@@ -103,69 +156,53 @@ public class CustomBookDaoImpl implements CustomBookDao {
         return result;
     }
 
-    private int findBookId(CustomBook book) throws DaoException {
+    @Override
+    public List<Optional<CustomBook>> findByField(CustomBookField field, String value) throws DaoException {
+        // TODO: 28.07.2020 validation
         Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        PreparedStatement statement = null;
         ResultSet resultSet = null;
-        int id = -1;
-
+        List<Optional<CustomBook>> books = new ArrayList<>();
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(SqlCustomBook.SELECT_ID_BOOK);
-            preparedStatement.setString(1, book.getName());
-            preparedStatement.setInt(2, book.getYear());
-            preparedStatement.setInt(3, book.getNumberPages());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                id = resultSet.getInt(CustomBookColumn.ID.getColumn());
-            }
+            statement = connection.prepareStatement(SqlCustomBook.SELECT_BOOKS_BY_FIELD_PART1 + field.getColumn() +
+                    SqlCustomBook.SELECT_BOOK_BY_FIELD_PART2);
+            statement.setString(1, value);
+            resultSet = statement.executeQuery();
+
+            extractBookList(resultSet);
         } catch (SQLException e) {
-            throw new DaoException("Can not find book", e);
+            throw new DaoException("Can not find book by name", e);
         } catch (ConnectionException e) {
             throw new DaoException("Can not create data source", e);
         } finally {
-            DaoUtil.closeConnection(connection, preparedStatement, resultSet);
+            DaoUtil.closeConnection(connection, statement, resultSet);
         }
-        return id;
+        return books;
     }
 
     @Override
-    public List<CustomBook> findByName(String name) {
-        return null; // TODO: 26.07.2020 findByName
-//        return Library.getInstance().getBooks().stream().
-//                filter(book -> book.getName().equals(name)).
-//                collect(Collectors.toList());
-    }
+    public List<Optional<CustomBook>> sortByField(CustomBookField field, int limit) throws DaoException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        List<Optional<CustomBook>> books = new ArrayList<>();
 
-    @Override
-    public List<CustomBook> findByAuthor(String author) {
-        return null; // TODO: 26.07.2020 findByAuthor
-//        return Library.getInstance().getBooks().stream().
-//                filter(book -> book.getAuthors().contains(author)).
-//                collect(Collectors.toList());
-    }
+        try {
+            connection = DataSourceFactory.createMysqlDataSource().getConnection();
+            statement = connection.prepareStatement(SqlCustomBook.SELECT_BOOKS_ORDER_BY_FIELD +
+                    field.getColumn() + SqlCustomBook.LIMIT);
+            statement.setInt(1, limit);
+            resultSet = statement.executeQuery();
 
-    @Override
-    public List<CustomBook> findByYear(int year) {
-        return null; // TODO: 26.07.2020 findByYear
-//        return Library.getInstance().getBooks().stream().
-//                filter(book -> book.getYear() == year).
-//                collect(Collectors.toList());
-    }
-
-    @Override
-    public List<CustomBook> findByNumberPages(int numberPages) {
-        return null; // TODO: 26.07.2020 findByNumberPages
-//        return Library.getInstance().getBooks().stream().
-//                filter(book -> book.getNumberPages() == numberPages).
-//                collect(Collectors.toList());
-    }
-
-    @Override
-    public List<CustomBook> sortByTag(SortType sortType) {
-        return null; // TODO: 26.07.2020 sortByTag
-//        return Library.getInstance().getBooks().stream()
-//                .sorted(sortType.getComparator())
-//                .collect(Collectors.toList());
+            extractBookList(resultSet);
+        } catch (SQLException e) {
+            throw new DaoException("Can not extract books from database", e);
+        } catch (ConnectionException e) {
+            throw new DaoException("Can not create data source", e);
+        } finally {
+            DaoUtil.closeConnection(connection, statement, resultSet);
+        }
+        return books;
     }
 }

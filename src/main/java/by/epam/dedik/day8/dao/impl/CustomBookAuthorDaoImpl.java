@@ -1,6 +1,6 @@
 package by.epam.dedik.day8.dao.impl;
 
-import by.epam.dedik.day8.dao.CustomBookAuthorColumn;
+import by.epam.dedik.day8.dao.CustomBookAuthorField;
 import by.epam.dedik.day8.dao.CustomBookAuthorDao;
 import by.epam.dedik.day8.dao.DaoException;
 import by.epam.dedik.day8.dao.DaoUtil;
@@ -19,17 +19,17 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
     public boolean addAuthor(CustomBookAuthor author) throws DaoException {
         boolean result = false;
         Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        PreparedStatement statement = null;
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.INSERT_AUTHOR);
+            statement = connection.prepareStatement(SqlCustomBookAuthor.INSERT_AUTHOR);
 
-            preparedStatement.setString(1, author.getName());
-            preparedStatement.setString(2, author.getSurname());
-            preparedStatement.setString(3, author.getLastName());
+            statement.setString(1, author.getName());
+            statement.setString(2, author.getSurname());
+            statement.setString(3, author.getLastName());
 
-            if (preparedStatement.executeUpdate() > 0) {
+            if (statement.executeUpdate() > 0) {
                 result = true;
             }
         } catch (SQLException e) {
@@ -37,7 +37,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
         } catch (ConnectionException e) {
             throw new DaoException("Can not create data source", e);
         } finally {
-            DaoUtil.closeConnection(connection, preparedStatement);
+            DaoUtil.closeConnection(connection, statement);
         }
         return result;
     }
@@ -46,17 +46,17 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
     public boolean deleteAuthor(CustomBookAuthor author) throws DaoException {
         boolean result = true;
         Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        PreparedStatement statement = null;
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.DELETE_AUTHOR);
+            statement = connection.prepareStatement(SqlCustomBookAuthor.DELETE_AUTHOR);
 
-            preparedStatement.setString(1, author.getName());
-            preparedStatement.setString(2, author.getSurname());
-            preparedStatement.setString(3, author.getLastName());
+            statement.setString(1, author.getName());
+            statement.setString(2, author.getSurname());
+            statement.setString(3, author.getLastName());
 
-            if (preparedStatement.executeUpdate() < 1) {
+            if (statement.executeUpdate() < 1) {
                 result = false;
             }
         } catch (SQLException e) {
@@ -64,7 +64,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
         } catch (ConnectionException e) {
             throw new DaoException("Can not create data source", e);
         } finally {
-            DaoUtil.closeConnection(connection, preparedStatement);
+            DaoUtil.closeConnection(connection, statement);
         }
         return result;
     }
@@ -78,17 +78,17 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
         } else {
             CustomBookAuthor author = optionalAuthor.get();
             Connection connection = null;
-            PreparedStatement preparedStatement = null;
+            PreparedStatement statement = null;
             try {
                 connection = DataSourceFactory.createMysqlDataSource().getConnection();
-                preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.UPDATE_AUTHOR_BY_ID);
+                statement = connection.prepareStatement(SqlCustomBookAuthor.UPDATE_AUTHOR_BY_ID);
 
-                preparedStatement.setString(1, newAuthor.getName());
-                preparedStatement.setString(2, newAuthor.getSurname());
-                preparedStatement.setString(3, newAuthor.getLastName());
-                preparedStatement.setInt(4, author.getId());
+                statement.setString(1, newAuthor.getName());
+                statement.setString(2, newAuthor.getSurname());
+                statement.setString(3, newAuthor.getLastName());
+                statement.setInt(4, author.getId());
 
-                if (preparedStatement.executeUpdate() < 1) {
+                if (statement.executeUpdate() < 1) {
                     result = false;
                 }
             } catch (SQLException e) {
@@ -96,7 +96,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
             } catch (ConnectionException e) {
                 throw new DaoException("Can not create data source", e);
             } finally {
-                DaoUtil.closeConnection(connection, preparedStatement);
+                DaoUtil.closeConnection(connection, statement);
             }
         }
         return result;
@@ -106,24 +106,24 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
     public Optional<CustomBookAuthor> findAuthor(CustomBookAuthor author) throws DaoException {
         Optional<CustomBookAuthor> result = Optional.empty();
         Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        PreparedStatement statement = null;
         ResultSet resultSet = null;
 
         try {
             connection = DataSourceFactory.createMysqlDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(SqlCustomBookAuthor.FIND_AUTHOR);
+            statement = connection.prepareStatement(SqlCustomBookAuthor.SELECT_AUTHOR);
 
-            preparedStatement.setString(1, author.getName());
-            preparedStatement.setString(2, author.getSurname());
-            preparedStatement.setString(3, author.getLastName());
-            resultSet = preparedStatement.executeQuery();
+            statement.setString(1, author.getName());
+            statement.setString(2, author.getSurname());
+            statement.setString(3, author.getLastName());
+            resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 CustomBookAuthor findAuthor =
-                        new CustomBookAuthor(resultSet.getInt(CustomBookAuthorColumn.ID.getColumn()),
-                                resultSet.getString(CustomBookAuthorColumn.NAME.getColumn()),
-                                resultSet.getString(CustomBookAuthorColumn.SURNAME.getColumn()),
-                                resultSet.getString(CustomBookAuthorColumn.LAST_NAME.getColumn()));
+                        new CustomBookAuthor(resultSet.getInt(CustomBookAuthorField.ID.getColumn()),
+                                resultSet.getString(CustomBookAuthorField.NAME.getColumn()),
+                                resultSet.getString(CustomBookAuthorField.SURNAME.getColumn()),
+                                resultSet.getString(CustomBookAuthorField.LAST_NAME.getColumn()));
 
                 result = Optional.of(findAuthor);
             }
@@ -132,7 +132,7 @@ public class CustomBookAuthorDaoImpl implements CustomBookAuthorDao {
         } catch (ConnectionException e) {
             throw new DaoException("Can not create data source", e);
         } finally {
-            DaoUtil.closeConnection(connection, preparedStatement, resultSet);
+            DaoUtil.closeConnection(connection, statement, resultSet);
         }
         return result;
     }
