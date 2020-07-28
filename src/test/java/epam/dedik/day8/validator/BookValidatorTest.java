@@ -17,11 +17,11 @@ public class BookValidatorTest {
 
     @Test(dataProvider = "getValidBook", dataProviderClass = DataTransfer.class)
     public void isValidBook_validBook_true(CustomBook book) {
-        Assert.assertTrue(validator.isValidBook(book));
+        Assert.assertTrue(validator.isValid(book));
     }
 
     @Test(dataProvider = "getInvalidBook", dataProviderClass = DataTransfer.class)
     public void isValidBook_invalidBook_false(CustomBook book) {
-        Assert.assertFalse(validator.isValidBook(book));
+        Assert.assertFalse(validator.isValid(book));
     }
 }

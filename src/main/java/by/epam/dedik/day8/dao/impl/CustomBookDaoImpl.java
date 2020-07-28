@@ -77,7 +77,7 @@ public class CustomBookDaoImpl implements CustomBookDao {
         PreparedStatement statement = null;
         if (findBookId(book) == -1) {
             try {
-                if (bookValidator.isValidBook(book)) {
+                if (bookValidator.isValid(book)) {
                     connection = DataSourceFactory.createMysqlDataSource().getConnection();
 
                     for (CustomBookAuthor author : book.getAuthors()) {
@@ -135,7 +135,7 @@ public class CustomBookDaoImpl implements CustomBookDao {
         book.setId(findBookId(book));
         if (book.getId() != -1) {
             try {
-                if (bookValidator.isValidBook(book)) {
+                if (bookValidator.isValid(book)) {
                     connection = DataSourceFactory.createMysqlDataSource().getConnection();
                     statement = connection.prepareStatement(SqlCustomBook.DELETE_LINK_AUTHOR_BOOK);
                     statement.setInt(1, book.getId());
