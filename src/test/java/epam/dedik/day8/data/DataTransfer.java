@@ -56,7 +56,7 @@ public class DataTransfer {
     @DataProvider
     public Object[][] getValidAuthor(){
         return new Object[][]{{
-                new CustomBookAuthor("name", "surname", "lastName")
+                new CustomBookAuthor("Name", "Surname", "Lastname")
         }};
     }
 }

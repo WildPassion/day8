@@ -79,7 +79,7 @@ public class CustomBookAuthorDaoImplTest {
 
     @Test(dataProvider = "getValidAuthor", dataProviderClass = DataTransfer.class)
     public void updateAuthor_author_true(CustomBookAuthor source) throws ConnectionException, DaoException {
-        CustomBookAuthor newAuthor = new CustomBookAuthor("name1", "surname", "lastName");
+        CustomBookAuthor newAuthor = new CustomBookAuthor("Newname", "Surname", "Lastname");
         if (!dao.addAuthor(source)) {
             logger.debug(dao.getClass() + ".addAuthor() return false but expected true ");
         }
